@@ -1,0 +1,58 @@
+def run(filename):
+    with open(filename) as f:
+        data = f.read().splitlines()
+
+    res = sol(data)
+    print('ans: %s' % res)
+
+
+def sol(data):
+    """
+    light red bags contain 1 bright white bag, 2 muted yellow bags.
+    dark orange bags contain 3 bright white bags, 4 muted yellow bags.
+    bright white bags contain 1 shiny gold bag.
+    muted yellow bags contain 2 shiny gold bags, 9 faded blue bags.
+    shiny gold bags contain 1 dark olive bag, 2 vibrant plum bags.
+    dark olive bags contain 3 faded blue bags, 4 dotted black bags.
+    vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.
+    faded blue bags contain no other bags.
+    dotted black bags contain no other bags.
+    """
+    target = 'shiny gold'
+
+    bags = {}
+    for line in data:
+        tmp = line.split(' bags contain ')
+        current_color = tmp[0]
+        if tmp[1] == 'no other bags.':
+            continue
+
+        contains = tmp[1].split(', ')
+        for contain in contains:
+            contain_tmp = contain.split(' ')
+            contain_num = int(contain_tmp[0])
+            contain_color = ' '.join([contain_tmp[i] for i in range(1, len(contain_tmp)-1)])
+            current_bag = bags.get(contain_color, {})
+            current_bag[current_color] = contain_num
+            bags[contain_color] = current_bag
+
+    cnt = 0
+    visited = set()
+    queue = [target]
+
+    while queue:
+        color = queue.pop()
+        if not color in visited:
+            visited.add(color)
+            if color != target:
+                cnt += 1
+
+        if color in bags:
+            for contain_color in bags[color]:
+                queue.append(contain_color)
+
+
+    return cnt
+
+if __name__ == '__main__':
+    run('input/day7')

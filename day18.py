@@ -18,64 +18,47 @@ def sol(data):
     res = []
 
     for line in data:
-        res.append(calculate(line))
+        res.append(calculate(list(line)))
 
-    print(res)
+    # print(res)
     return sum(res)
 
 def calculate(s):
-    current_num = -1
+    if len(s) == 0:
+        return 0
+
     stack = []
+    sign = '+'
+    num = 0
 
-    for i, c in enumerate(s):
-        if c == '(':
-            stack.append((0, '+'))
-            continue
-        if c == ')':
-            num, sign = stack.pop()
-            if current_num != -1:
-                if sign == '+':
-                    new_num = num + current_num
-                else:
-                    new_num = num * current_num
-                current_num = -1
-            else:
-                new_num = num
-
-            if stack:
-                num, sign = stack.pop()
-                if sign == '+':
-                    num = num + new_num
-                else:
-                    num = num * new_num
-                stack.append((num, '+'))
-            else:
-                stack.append((new_num, '+'))
-
-        if i == 0: # but not '('
-            stack.append((0, '+'))
+    while len(s) > 0:
+        c = s.pop(0)
 
         if c.isdigit():
-            if current_num == -1:
-                current_num = int(c)
-            else:
-                current_num = current_num * 10 + int(c)
+            num = num * 10 + int(c)
 
-        if c in '+*' or i == len(s) - 1: # sign or last one
-            num, sign = stack.pop()
-            if current_num != -1:
-                if sign == '+':
-                    num = num + current_num
+        if c == '(':
+            num = calculate(s) # recursive
+
+        if len(s) == 0 or (c in '+*)'):
+            if sign == '+':
+                if not stack:
+                    stack.append(num)
                 else:
-                    num = num * current_num
-                current_num = -1
-            stack.append((num, c))
+                    stack[-1] = stack[-1] + num
+            elif sign == '*':
+                if not stack:
+                    stack.append(num)
+                else:
+                    stack[-1] = stack[-1] * num
 
-    res = 0
-    while stack:
-        tmp = stack.pop()
-        res += tmp[0]
-    return res
+            sign = c
+            num = 0
+
+            if sign == ')':
+                break
+
+    return stack[0]
 
 if __name__ == '__main__':
     # run('input/day18_test')
